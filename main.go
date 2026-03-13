@@ -37,7 +37,7 @@ func search(
 ) *component.ComponentReturn[d.SearchOutput] {
 	cString := strconv.Itoa(input.Body.Context)
 
-	res := ctx.RunInDirectory(input.Body.Path, "rg", "-C", cString, "--json", input.Body.Pattern)
+	res := ctx.RunInDirectory(input.Body.Path, "rg", "-i", "-C", cString, "--json", input.Body.Pattern)
 	if !res.Ok {
 		return input.Error(fmt.Sprintf("Search could not be completed: %s.", res.Error))
 	}
