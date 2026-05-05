@@ -32,14 +32,14 @@ type ripgrepElapsedTotal struct {
 }
 
 func search(
-	input *component.ComponentInput[d.SearchInput, d.SearchOutput],
+	input d.SearchInput,
 	ctx *component.ComponentContainer,
-) *component.ComponentReturn[d.SearchOutput] {
-	cString := strconv.Itoa(input.Body.Context)
+) (*d.SearchOutput, error) {
+	cString := strconv.Itoa(input.Context)
 
-	res := ctx.RunInDirectory(input.Body.Path, "rg", "-i", "-C", cString, "--json", input.Body.Pattern)
+	res := ctx.RunInDirectory(input.Path, "rg", "-i", "-C", cString, "--json", input.Pattern)
 	if !res.Ok {
-		return input.Error(fmt.Sprintf("Search could not be completed: %s.", res.Error))
+		return nil, fmt.Errorf("Search could not be completed: %s.", res.Error)
 	}
 
 	out := d.SearchOutput{
@@ -79,7 +79,7 @@ func search(
 				continue
 			}
 			tempMatch.File = matchData.Path.Text
-			tempMatch.AbsolutePath = path.Join(input.Body.Path, matchData.Path.Text)
+			tempMatch.AbsolutePath = path.Join(input.Path, matchData.Path.Text)
 			tempMatch.LineNumber = matchData.LineNumber
 			tempMatch.Match = matchData.Lines.Text
 		case "separator", "end":
@@ -97,7 +97,7 @@ func search(
 		}
 	}
 
-	return input.Return(out)
+	return &out, nil
 }
 
 func main() {
